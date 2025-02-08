@@ -21,11 +21,14 @@ Prazo estimado: <dias> úteis (encomenda)
 
 Exemplo de orçamento:
 
-Filtro de óleo (JG571014) 
+```
+Filtro de óleo (JG571014)
 Valor: R$ 21,38
 Prazo: À pronta entrega
-
+```
 
 ## Tecnologias:
 
 O projeto será feito via Pyhton, para o banco de dados vamos utilizar a bibilioteca SQLALCHEMY
+
+[![UML](Diagrama.png)]
