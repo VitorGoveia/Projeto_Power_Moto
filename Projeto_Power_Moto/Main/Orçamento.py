@@ -53,10 +53,48 @@ class Item(Base):
 class Cliente(Base):
     __tablename__ = 'cliente'
 
-    id_cliente = Column(Integer, primary_key = True, autoincrement=True)
     Nome = Column(String)
-    Telefone = Column(String) 
+    Telefone = Column(String, primary_key = True)
 
+    def adicionar_cliente(self):
+        Nome_cliente = input("Digite o nome do cliente a ser cadastrado: ")
+        Telefone_cliente = input("Digite o telefone (somente número): ")
+        
+        criar_cliente = session.query(Cliente).filter_by(Telefone = Telefone_cliente).first()
+        if not criar_cliente:
+            criar_cliente = Cliente(Nome = Nome_cliente,
+                                    Telefone = Telefone_cliente)
+            session.add(criar_cliente)
+            session.commit()
+            print("Cliente cadastrado!")
+            print()
+            return
+        print("Telefone já cadastrado")
+
+    def exibir_cliente(self):  # Funçao somente para exibir os itens
+        Tel_cliente = input("Digite o Telefone a ser verificado (não digite nada para todos): ")
+
+        if Tel_cliente:
+            Cli = session.query(Cliente).filter_by(Telefone = Tel_cliente).first()
+            if Cli:
+                print()
+                print(f'Nome: {Cli.Nome}')
+                print(f'Telefone: {Cli.Telefone}')
+                print()
+                return
+            else:
+                print()
+                print("Cliente não encontrado")
+                print()
+                return
+        else:
+            Cli = session.query(Cliente).all()
+            for cliente_dado in Cli:  # percorre o conjunto de matérias
+                print()
+                print(f'Nome: {cliente_dado.Nome}')
+                print(f'Telefone: {cliente_dado.Telefone}')
+                print()
+            
 #Tabela de Item_pedido:
 
 class Item_Pedido(Base):
@@ -76,7 +114,7 @@ class Pedido(Base):
     __tablename__ = 'pedidos'
 
     id_Pedido = Column(Integer, primary_key=True, autoincrement=True) 
-    id_cliente = Column(Integer, ForeignKey("cliente.id_cliente"))  # Relacionado a Cliente
+    Telefone = Column(Integer, ForeignKey("cliente.Telefone"))  # Relacionado a Cliente
     id_itemPedido = Column(Integer, ForeignKey("item_pedido.id_itemPedido"))  # Relacionado a Item_Pedido
 
     cliente = relationship("Cliente", backref="pedidos")
@@ -91,7 +129,7 @@ while True:  # menu interativo
         [ 2 ] Adicionar Item
         [ 3 ] Exibir Item
         [ 4 ] Deletar Item
-        [ 5 ] Verificar Orçamento
+        [ 5 ] Alterar Orçamento
         Digite aqui: """))
     except ValueError:
         print("Oops! Parece que você digitou um caractere que não é um número, por favor tente de novo.")
@@ -99,10 +137,12 @@ while True:  # menu interativo
 
     #Instânciando as tabelas
     item_instancia = Item()
+    cliente_instancia = Cliente()
 
     if opcao == 1:
-        materia = input('Nome da matéria: ')
-
+        cliente_instancia.adicionar_cliente()
+        cliente_instancia.exibir_cliente()
+        
     elif opcao == 2:
         SKU = input('Digite a SKU do item: ')
         Nome = input('Digite o nome do item: ')
