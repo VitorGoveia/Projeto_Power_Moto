@@ -21,13 +21,13 @@ pedido_item_associacao = Table(
 
 #Criando um modelo padrão para que seja possível utilizar a relação 1 para muitos 1:N
 
-class Modelo_Base(Base):
+class ModeloBase(Base):
     __abstract__ = True
     __allow_unmapped__ = True
 
 #Tabela de Item:
 
-class Item(Modelo_Base):
+class Item(ModeloBase):
     __tablename__ = 'itens'
 
     SKU = Column(String, primary_key = True)
@@ -36,16 +36,16 @@ class Item(Modelo_Base):
     Marca = Column(String)
 
     def Adicionar_Item(self):
-        SKU_item = input('Digite a SKU do item: ')
+        sku_item = input('Digite a SKU do item: ')
         Nome = input('Digite o nome do item: ')
         Valor = float(input('Agora digite o valor unitário do item (com .):'))
         Marca_item = input('Digite a marca do item: ')
         
-        criar_item = session.query(Item).filter_by(SKU=SKU_item).first()
+        criar_item = session.query(Item).filter_by(SKU=sku_item).first()
         if criar_item:
             print("Já há um item com essa SKU!")
         else:
-            criar_item = Item(SKU=SKU_item,
+            criar_item = Item(SKU=sku_item,
                                 Nome_do_Item = Nome,
                                 Valor_Unitario = Valor,
                                 Marca = Marca_item)
@@ -125,7 +125,7 @@ class Item(Modelo_Base):
 
 #Tabela de Cliente:
 
-class Cliente(Modelo_Base):
+class Cliente(ModeloBase):
     __tablename__ = 'cliente'
 
     Nome = Column(String)
@@ -204,7 +204,7 @@ class Cliente(Modelo_Base):
 
 #Tabela de Item_pedido:
 
-class Item_Pedido(Modelo_Base):
+class Item_Pedido(ModeloBase):
     __tablename__ = 'item_pedido'
 
     id_itemPedido = Column(Integer, primary_key = True, autoincrement=True) 
@@ -217,8 +217,8 @@ class Item_Pedido(Modelo_Base):
 
     def criar_itens_pedido(self):
         while True:
-            Sku_item = input("Digite a SKU do item: ")
-            Valida_Sku = session.query(Item).filter_by(SKU = Sku_item).first()
+            sku_item = input("Digite a SKU do item: ")
+            Valida_Sku = session.query(Item).filter_by(SKU = sku_item).first()
             if Valida_Sku:
                 break
             print("Item não encontrado, favor cadastrar:")
@@ -245,7 +245,7 @@ class Item_Pedido(Modelo_Base):
         
 #Tabela de Pedido:
 
-class Pedido(Modelo_Base):
+class Pedido(ModeloBase):
     __tablename__ = 'pedidos'
 
     id_Pedido = Column(Integer, primary_key=True, autoincrement=True)
@@ -356,7 +356,63 @@ class Pedido(Modelo_Base):
 
         print("\n--- Fim do Pedido ---\n")
 
-        
+    def Alterar_pedido(self):
+        numero_pedido = input("Digite o número do pedido: ")
+        while True:
+            pedido = session.query(Pedido).filter_by(id_Pedido=numero_pedido).one_or_none()
+            if not pedido:
+                print("Erro: Nenhum pedido encontrado com esse número!")
+            else:
+                self.Exibir_Pedido(numero_pedido)
+
+            if pedido:
+                while True:
+                    try:
+                        opcao = int(input("""Escolha o que você deseja alterar no pedido:
+                            [ 1 ] Alterar Cliente
+                            [ 2 ] Alterar quantidade do Item de Pedido
+                            [ 3 ] Excluir item do pedido
+                            [ 4 ] Acrescentar item no pedido
+                            Digite aqui: """))
+                    except ValueError:
+                        print(
+                            "Oops! Parece que você digitou um caractere que não é um número, por favor tente de novo.")
+                        continue
+
+                    if opcao == 1:
+                        opcao_cliente = input("Você deseja alterar o cliente? (S/N)").upper()
+                        if opcao_cliente[0] == "S":
+                            pedido.Telefone_Cliente = input("Digite o telefone do novo cliente: ")
+                        elif opcao_cliente[0] == "N":
+                            print(
+                                "Caso deseje alterar o nome do cliente, altere pela aba 'Alterar -> Clientes'")
+                            return
+                        else:
+                            print("Nenhum valor um válido foi digitado!")
+                            return
+
+                    elif opcao == 2: #Trocar a quantidade de algum item do pedido
+                        pass
+
+                    elif opcao == 3: #Excluir item do pedido
+                        pass
+
+                    elif opcao == 4: #Adicionar item no pedido
+                        pass
+
+                    else:
+                        print("Opção inválida")
+
+                    session.commit()
+                    print()
+                    print("Alteração feita com sucesso!")
+                    print()
+                    break
+                break
+            else:
+                tel_cliente = input("Item não existe! Digite novamente: ")
+                if not tel_cliente:
+                    break
 
         #POSSO CRIAR UMA LISTA COM TODOS OS ID DO ITEM DO PEDIDO e depois chamar na query com um for, então a função exibir deve receber uma lista e não um ID apenas
         
@@ -400,13 +456,8 @@ while True:  # menu interativo
             item_instancia.Alterar_item()
         elif opcao == 2:
             cliente_instancia.Alterar_cliente()
-
-        if opcao == 1:
-            item_instancia.Alterar_item()
-        elif opcao == 2:
-            pass
         elif opcao == 3:
-            pass
+            pedido_instancia.Alterar_pedido()
 
     elif opcao == 3:
         item_instancia.Exibir_item()
