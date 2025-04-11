@@ -1,5 +1,12 @@
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Numeric, Table, desc
 from sqlalchemy.orm import relationship, sessionmaker, declarative_base
+import os
+
+def limpar_tela():
+    os.system('cls' if os.name == 'nt' else 'clear')
+    # Verifica o sistema operacional:
+    # - Se for Windows (os.name == 'nt'), executa o comando 'cls'
+    # - Caso contrário (Linux ou macOS), executa o comando 'clear'
 
 #Criando o banco de dados(sqlite) com nome Catalogo, e atribuindo a variável engine
 engine = create_engine('sqlite:///Catalogo.db') 
@@ -63,7 +70,8 @@ class Item(ModeloBase):
         print()    
 
     # Funçao somente para exibir os itens
-    def Exibir_item(self):  
+    def Exibir_item(self):
+        limpar_tela()
         buscar = input("Digite a SKU do item ou deixe em branco para todos: ")
         if buscar:
             while True:
@@ -82,7 +90,7 @@ class Item(ModeloBase):
             else:
                 print('Esses são todos os itens em nosso Banco de Dados:')
                 for item in itens:  # percorre o conjunto de matérias
-                    self._exibir_detalhes_itens(item)
+                    self._Exibir_detalhes_itens(item)
 
     # Funçao somente para alterar um item:
     def Alterar_item(self):
@@ -113,6 +121,7 @@ class Item(ModeloBase):
                     
                     session.commit()
                     print()
+                    limpar_tela()
                     print("Alteração feita com sucesso!")
                     print()
                     break
@@ -152,8 +161,10 @@ class Cliente(ModeloBase):
         print(f"Telefone {tel.Telefone}")
         print()
 
-    def exibir_cliente(self):  # Funçao somente para exibir os itens
-        Tel_cliente = input("Digite o Telefone a ser verificado (não digite nada para todos): ")
+    def exibir_cliente(self, Tel_cliente=None):  # Funçao somente para exibir os itens
+        limpar_tela()
+        if Tel_cliente is None:
+            Tel_cliente = input("Digite o Telefone a ser verificado (não digite nada para todos): ")
 
         if Tel_cliente:
             Cli = session.query(Cliente).filter_by(Telefone = Tel_cliente).first()
@@ -171,8 +182,9 @@ class Cliente(ModeloBase):
                 self._Exibir_detalhes_cliente(cliente_dado)
 
 
-    def Alterar_cliente(self):
-        tel_cliente = input("Digite o telefone do cliente que será alterado: ")
+    def Alterar_cliente(self, tel_cliente=None):
+        if tel_cliente is None:
+            tel_cliente = input("Digite o telefone do cliente que será alterado: ")
         while True:
             cliente = session.query(Cliente).filter_by(Telefone=tel_cliente).one_or_none()
             if not cliente:
@@ -183,7 +195,7 @@ class Cliente(ModeloBase):
                 while True:
                     opcao = input("Você deseja alterar o nome? (S/N)").upper()
                     if opcao[0] == "S":
-                        cliente.Nome_do_Item = input("Digite o novo nome do cliente: ")
+                        cliente.Nome = input("Digite o novo nome do cliente: ")
                     elif opcao[0] == "N":
                         print("O telefone é um atributo imutável, caso você deseje esse cliente com um novo número, será preciso criar um novo cadastro!")
                         return
@@ -193,6 +205,7 @@ class Cliente(ModeloBase):
 
                     session.commit()
                     print()
+                    limpar_tela()
                     print("Alteração feita com sucesso!")
                     print()
                     break
@@ -300,7 +313,10 @@ class Pedido(ModeloBase):
         # Exibir o pedido
         pedido_instancia.Exibir_Pedido(novo_pedido.id_Pedido)
         
-    def Exibir_Pedido(self, Id_pedido_inserido):
+    def Exibir_Pedido(self, Id_pedido_inserido=None):
+        limpar_tela()
+        if Id_pedido_inserido is None:
+            Id_pedido_inserido = input("Digite o Id pedido: ")
         # Buscar o pedido pelo ID
         pedido = session.query(Pedido).filter_by(id_Pedido=Id_pedido_inserido).first()
         
@@ -329,8 +345,6 @@ class Pedido(ModeloBase):
         Lista_ids = []
         for lista_id_item_pedido in itens_pedido:
             Lista_ids.append(lista_id_item_pedido.id_itemPedido)
-
-        print("\nItens do Pedido:")
         
         for item_pedido in Lista_ids:
             Buscar_iP = session.query(Item_Pedido).filter_by(id_itemPedido = item_pedido).first()
@@ -362,35 +376,42 @@ class Pedido(ModeloBase):
             pedido = session.query(Pedido).filter_by(id_Pedido=numero_pedido).one_or_none()
             if not pedido:
                 print("Erro: Nenhum pedido encontrado com esse número!")
-            else:
-                self.Exibir_Pedido(numero_pedido)
+                numero_pedido = input("Digite o número do pedido novamente: ")
+                continue
 
             if pedido:
                 while True:
+                    self.Exibir_Pedido(numero_pedido)
                     try:
                         opcao = int(input("""Escolha o que você deseja alterar no pedido:
                             [ 1 ] Alterar Cliente
                             [ 2 ] Alterar quantidade do Item de Pedido
                             [ 3 ] Excluir item do pedido
                             [ 4 ] Acrescentar item no pedido
+                            [ 5 ] Voltar ao página principal
                             Digite aqui: """))
                     except ValueError:
-                        print(
-                            "Oops! Parece que você digitou um caractere que não é um número, por favor tente de novo.")
+                        limpar_tela()
+                        print("Oops! Parece que você digitou um caractere que não é um número, por favor tente de novo.")
                         continue
 
                     if opcao == 1:
-                        opcao_cliente = input("Você deseja alterar o cliente? (S/N)").upper()
-                        if opcao_cliente[0] == "S":
-                            pedido.Telefone_Cliente = input("Digite o telefone do novo cliente: ")
-                        elif opcao_cliente[0] == "N":
-                            print(
-                                "Caso deseje alterar o nome do cliente, altere pela aba 'Alterar -> Clientes'")
-                            return
-                        else:
-                            print("Nenhum valor um válido foi digitado!")
-                            return
+                        cliente_instancia.exibir_cliente(pedido.Telefone_Cliente)
+                        try:
+                            opcao_cliente = int(input("""O que você deseja alterar no cliente?
+                                [ 1 ] O cliente atribuído no pedido
+                                [ 2 ] O nome do cliente (manter o número)
+                                Digite aqui:"""))
+                            if opcao_cliente == 1:
+                                pedido.Telefone_Cliente = input("Digite o telefone do novo cliente: ")
 
+                                print("\nCliente alterado com sucesso!")
+                            elif opcao_cliente == 2:
+                                cliente_instancia.Alterar_cliente(pedido.Telefone_Cliente)
+                        except ValueError:
+                            limpar_tela()
+                            print("Oops! Parece que você digitou um caractere que não é um número, por favor tente de novo.")
+                            continue
                     elif opcao == 2: #Trocar a quantidade de algum item do pedido
                         pass
 
@@ -400,19 +421,18 @@ class Pedido(ModeloBase):
                     elif opcao == 4: #Adicionar item no pedido
                         pass
 
-                    else:
-                        print("Opção inválida")
+                    elif opcao == 5:
+                        break
 
-                    session.commit()
-                    print()
-                    print("Alteração feita com sucesso!")
-                    print()
-                    break
+                    else:
+                        print("Número inválido")
+
+
+                session.commit()
+                limpar_tela()
+                print("Alterações feitas com sucesso!")
+                print()
                 break
-            else:
-                tel_cliente = input("Item não existe! Digite novamente: ")
-                if not tel_cliente:
-                    break
 
         #POSSO CRIAR UMA LISTA COM TODOS OS ID DO ITEM DO PEDIDO e depois chamar na query com um for, então a função exibir deve receber uma lista e não um ID apenas
         
@@ -429,6 +449,7 @@ while True:  # menu interativo
         [ 4 ] Deletar
         Digite aqui: """))
     except ValueError:
+        limpar_tela()
         print("Oops! Parece que você digitou um caractere que não é um número, por favor tente de novo.")
         continue
 
@@ -439,6 +460,7 @@ while True:  # menu interativo
     pedido_instancia = Pedido()
     
     if opcao == 1:
+        limpar_tela()
         pedido_instancia.Criar_pedido()
         
     elif opcao == 2:
@@ -449,6 +471,7 @@ while True:  # menu interativo
             [ 3 ] Alterar Pedido
             Digite aqui: """))
         except ValueError:
+            limpar_tela()
             print("Oops! Parece que você digitou um caractere que não é um número, por favor tente de novo.")
             continue
 
@@ -460,7 +483,26 @@ while True:  # menu interativo
             pedido_instancia.Alterar_pedido()
 
     elif opcao == 3:
-        item_instancia.Exibir_item()
+        try:
+            opcao = int(input("""O que você deseja visualizar? 
+                [ 1 ] Item
+                [ 2 ] Cliente
+                [ 3 ] Pedido  
+                Digite aqui: """))
+        except ValueError:
+            limpar_tela()
+            print(("Ops! Parece que você digitou um caractere que não é número, tente novamente:"))
+            continue
+
+        if opcao == 1:
+            item_instancia.Exibir_item()
+
+        elif opcao == 2:
+            cliente_instancia.exibir_cliente()
+
+        elif opcao == 3:
+            pedido_instancia.Exibir_Pedido()
+
 
     elif opcao == 4:
         pedido_instancia.Criar_pedido()
