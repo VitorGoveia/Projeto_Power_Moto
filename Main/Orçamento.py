@@ -1,5 +1,12 @@
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Numeric, Table, desc
 from sqlalchemy.orm import relationship, sessionmaker, declarative_base
+import os
+
+def limpar_tela():
+    os.system('cls' if os.name == 'nt' else 'clear')
+    # Verifica o sistema operacional:
+    # - Se for Windows (os.name == 'nt'), executa o comando 'cls'
+    # - Caso contrário (Linux ou macOS), executa o comando 'clear'
 
 #Criando o banco de dados(sqlite) com nome Catalogo, e atribuindo a variável engine
 engine = create_engine('sqlite:///Catalogo.db') 
@@ -63,7 +70,8 @@ class Item(ModeloBase):
         print()    
 
     # Funçao somente para exibir os itens
-    def Exibir_item(self):  
+    def Exibir_item(self):
+        limpar_tela()
         buscar = input("Digite a SKU do item ou deixe em branco para todos: ")
         if buscar:
             while True:
@@ -113,6 +121,7 @@ class Item(ModeloBase):
                     
                     session.commit()
                     print()
+                    limpar_tela()
                     print("Alteração feita com sucesso!")
                     print()
                     break
@@ -153,6 +162,7 @@ class Cliente(ModeloBase):
         print()
 
     def exibir_cliente(self, Tel_cliente=None):  # Funçao somente para exibir os itens
+        limpar_tela()
         if Tel_cliente is None:
             Tel_cliente = input("Digite o Telefone a ser verificado (não digite nada para todos): ")
 
@@ -195,6 +205,7 @@ class Cliente(ModeloBase):
 
                     session.commit()
                     print()
+                    limpar_tela()
                     print("Alteração feita com sucesso!")
                     print()
                     break
@@ -302,7 +313,10 @@ class Pedido(ModeloBase):
         # Exibir o pedido
         pedido_instancia.Exibir_Pedido(novo_pedido.id_Pedido)
         
-    def Exibir_Pedido(self, Id_pedido_inserido):
+    def Exibir_Pedido(self, Id_pedido_inserido=None):
+        limpar_tela()
+        if Id_pedido_inserido is None:
+            Id_pedido_inserido = input("Digite o Id pedido: ")
         # Buscar o pedido pelo ID
         pedido = session.query(Pedido).filter_by(id_Pedido=Id_pedido_inserido).first()
         
@@ -331,8 +345,6 @@ class Pedido(ModeloBase):
         Lista_ids = []
         for lista_id_item_pedido in itens_pedido:
             Lista_ids.append(lista_id_item_pedido.id_itemPedido)
-
-        print("\nItens do Pedido:")
         
         for item_pedido in Lista_ids:
             Buscar_iP = session.query(Item_Pedido).filter_by(id_itemPedido = item_pedido).first()
@@ -364,11 +376,12 @@ class Pedido(ModeloBase):
             pedido = session.query(Pedido).filter_by(id_Pedido=numero_pedido).one_or_none()
             if not pedido:
                 print("Erro: Nenhum pedido encontrado com esse número!")
-            else:
-                self.Exibir_Pedido(numero_pedido)
+                numero_pedido = input("Digite o número do pedido novamente: ")
+                continue
 
             if pedido:
                 while True:
+                    self.Exibir_Pedido(numero_pedido)
                     try:
                         opcao = int(input("""Escolha o que você deseja alterar no pedido:
                             [ 1 ] Alterar Cliente
@@ -378,8 +391,8 @@ class Pedido(ModeloBase):
                             [ 5 ] Voltar ao página principal
                             Digite aqui: """))
                     except ValueError:
-                        print(
-                            "Oops! Parece que você digitou um caractere que não é um número, por favor tente de novo.")
+                        limpar_tela()
+                        print("Oops! Parece que você digitou um caractere que não é um número, por favor tente de novo.")
                         continue
 
                     if opcao == 1:
@@ -396,8 +409,8 @@ class Pedido(ModeloBase):
                             elif opcao_cliente == 2:
                                 cliente_instancia.Alterar_cliente(pedido.Telefone_Cliente)
                         except ValueError:
-                            print(
-                                "Oops! Parece que você digitou um caractere que não é um número, por favor tente de novo.")
+                            limpar_tela()
+                            print("Oops! Parece que você digitou um caractere que não é um número, por favor tente de novo.")
                             continue
                     elif opcao == 2: #Trocar a quantidade de algum item do pedido
                         pass
@@ -416,7 +429,7 @@ class Pedido(ModeloBase):
 
 
                 session.commit()
-                print()
+                limpar_tela()
                 print("Alterações feitas com sucesso!")
                 print()
                 break
@@ -436,6 +449,7 @@ while True:  # menu interativo
         [ 4 ] Deletar
         Digite aqui: """))
     except ValueError:
+        limpar_tela()
         print("Oops! Parece que você digitou um caractere que não é um número, por favor tente de novo.")
         continue
 
@@ -446,6 +460,7 @@ while True:  # menu interativo
     pedido_instancia = Pedido()
     
     if opcao == 1:
+        limpar_tela()
         pedido_instancia.Criar_pedido()
         
     elif opcao == 2:
@@ -456,6 +471,7 @@ while True:  # menu interativo
             [ 3 ] Alterar Pedido
             Digite aqui: """))
         except ValueError:
+            limpar_tela()
             print("Oops! Parece que você digitou um caractere que não é um número, por favor tente de novo.")
             continue
 
@@ -467,7 +483,26 @@ while True:  # menu interativo
             pedido_instancia.Alterar_pedido()
 
     elif opcao == 3:
-        item_instancia.Exibir_item()
+        try:
+            opcao = int(input("""O que você deseja visualizar? 
+                [ 1 ] Item
+                [ 2 ] Cliente
+                [ 3 ] Pedido  
+                Digite aqui: """))
+        except ValueError:
+            limpar_tela()
+            print(("Ops! Parece que você digitou um caractere que não é número, tente novamente:"))
+            continue
+
+        if opcao == 1:
+            item_instancia.Exibir_item()
+
+        elif opcao == 2:
+            cliente_instancia.exibir_cliente()
+
+        elif opcao == 3:
+            pedido_instancia.Exibir_Pedido()
+
 
     elif opcao == 4:
         pedido_instancia.Criar_pedido()
