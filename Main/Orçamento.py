@@ -82,7 +82,7 @@ class Item(ModeloBase):
             else:
                 print('Esses são todos os itens em nosso Banco de Dados:')
                 for item in itens:  # percorre o conjunto de matérias
-                    self._exibir_detalhes_itens(item)
+                    self._Exibir_detalhes_itens(item)
 
     # Funçao somente para alterar um item:
     def Alterar_item(self):
@@ -152,8 +152,9 @@ class Cliente(ModeloBase):
         print(f"Telefone {tel.Telefone}")
         print()
 
-    def exibir_cliente(self):  # Funçao somente para exibir os itens
-        Tel_cliente = input("Digite o Telefone a ser verificado (não digite nada para todos): ")
+    def exibir_cliente(self, Tel_cliente=None):  # Funçao somente para exibir os itens
+        if Tel_cliente is None:
+            Tel_cliente = input("Digite o Telefone a ser verificado (não digite nada para todos): ")
 
         if Tel_cliente:
             Cli = session.query(Cliente).filter_by(Telefone = Tel_cliente).first()
@@ -171,8 +172,9 @@ class Cliente(ModeloBase):
                 self._Exibir_detalhes_cliente(cliente_dado)
 
 
-    def Alterar_cliente(self):
-        tel_cliente = input("Digite o telefone do cliente que será alterado: ")
+    def Alterar_cliente(self, tel_cliente=None):
+        if tel_cliente is None:
+            tel_cliente = input("Digite o telefone do cliente que será alterado: ")
         while True:
             cliente = session.query(Cliente).filter_by(Telefone=tel_cliente).one_or_none()
             if not cliente:
@@ -183,7 +185,7 @@ class Cliente(ModeloBase):
                 while True:
                     opcao = input("Você deseja alterar o nome? (S/N)").upper()
                     if opcao[0] == "S":
-                        cliente.Nome_do_Item = input("Digite o novo nome do cliente: ")
+                        cliente.Nome = input("Digite o novo nome do cliente: ")
                     elif opcao[0] == "N":
                         print("O telefone é um atributo imutável, caso você deseje esse cliente com um novo número, será preciso criar um novo cadastro!")
                         return
@@ -373,6 +375,7 @@ class Pedido(ModeloBase):
                             [ 2 ] Alterar quantidade do Item de Pedido
                             [ 3 ] Excluir item do pedido
                             [ 4 ] Acrescentar item no pedido
+                            [ 5 ] Voltar ao página principal
                             Digite aqui: """))
                     except ValueError:
                         print(
@@ -380,17 +383,22 @@ class Pedido(ModeloBase):
                         continue
 
                     if opcao == 1:
-                        opcao_cliente = input("Você deseja alterar o cliente? (S/N)").upper()
-                        if opcao_cliente[0] == "S":
-                            pedido.Telefone_Cliente = input("Digite o telefone do novo cliente: ")
-                        elif opcao_cliente[0] == "N":
-                            print(
-                                "Caso deseje alterar o nome do cliente, altere pela aba 'Alterar -> Clientes'")
-                            return
-                        else:
-                            print("Nenhum valor um válido foi digitado!")
-                            return
+                        cliente_instancia.exibir_cliente(pedido.Telefone_Cliente)
+                        try:
+                            opcao_cliente = int(input("""O que você deseja alterar no cliente?
+                                [ 1 ] O cliente atribuído no pedido
+                                [ 2 ] O nome do cliente (manter o número)
+                                Digite aqui:"""))
+                            if opcao_cliente == 1:
+                                pedido.Telefone_Cliente = input("Digite o telefone do novo cliente: ")
 
+                                print("\nCliente alterado com sucesso!")
+                            elif opcao_cliente == 2:
+                                cliente_instancia.Alterar_cliente(pedido.Telefone_Cliente)
+                        except ValueError:
+                            print(
+                                "Oops! Parece que você digitou um caractere que não é um número, por favor tente de novo.")
+                            continue
                     elif opcao == 2: #Trocar a quantidade de algum item do pedido
                         pass
 
@@ -400,19 +408,18 @@ class Pedido(ModeloBase):
                     elif opcao == 4: #Adicionar item no pedido
                         pass
 
-                    else:
-                        print("Opção inválida")
+                    elif opcao == 5:
+                        break
 
-                    session.commit()
-                    print()
-                    print("Alteração feita com sucesso!")
-                    print()
-                    break
+                    else:
+                        print("Número inválido")
+
+
+                session.commit()
+                print()
+                print("Alterações feitas com sucesso!")
+                print()
                 break
-            else:
-                tel_cliente = input("Item não existe! Digite novamente: ")
-                if not tel_cliente:
-                    break
 
         #POSSO CRIAR UMA LISTA COM TODOS OS ID DO ITEM DO PEDIDO e depois chamar na query com um for, então a função exibir deve receber uma lista e não um ID apenas
         
