@@ -313,7 +313,7 @@ class Pedido(ModeloBase):
         # Exibir o pedido
         pedido_instancia.Exibir_Pedido(novo_pedido.id_Pedido)
         
-    def Exibir_Pedido(self, Id_pedido_inserido=None):
+    def Exibir_Pedido(self, Id_pedido_inserido=None, id_item=None):
         limpar_tela()
         if Id_pedido_inserido is None:
             Id_pedido_inserido = input("Digite o Id pedido: ")
@@ -345,10 +345,13 @@ class Pedido(ModeloBase):
         Lista_ids = []
         for lista_id_item_pedido in itens_pedido:
             Lista_ids.append(lista_id_item_pedido.id_itemPedido)
-        
+
+
         for item_pedido in Lista_ids:
             Buscar_iP = session.query(Item_Pedido).filter_by(id_itemPedido = item_pedido).first()
             item = session.query(Item).filter_by(SKU = Buscar_iP.SKU).first()
+
+
 
             if not item:
                 print(f"Item com SKU {item_pedido.SKU} não encontrado.")
@@ -356,8 +359,11 @@ class Pedido(ModeloBase):
             
             quantidade = Buscar_iP.quantidade
             descricao_quantidade = f"{quantidade} UNIDADE" if quantidade == 1 else f"{quantidade} UNIDADES"
-            
-            print(f"\n{item.Nome_do_Item} ({item.SKU}) - {descricao_quantidade}")
+
+            if id_item is not None:
+                print(f"\nId do item: {Buscar_iP.id_itemPedido}")
+
+            print(f"{item.Nome_do_Item} ({item.SKU}) - {descricao_quantidade}")
             print(f"Valor: R$ {Buscar_iP.Valor_ItemPedido:.2f}")
 
             # Exibir o prazo de entrega
@@ -413,7 +419,23 @@ class Pedido(ModeloBase):
                             print("Oops! Parece que você digitou um caractere que não é um número, por favor tente de novo.")
                             continue
                     elif opcao == 2: #Trocar a quantidade de algum item do pedido
-                        pass
+                        limpar_tela()
+                        self.Exibir_Pedido(numero_pedido, "sim")
+                        try:
+                            opcao_item_pedido = int(input("""O que você deseja alterar?
+                                [ 1 ] Quantidade de item
+                                [ 2 ] Prazo
+                                Digite aqui:"""))
+                            if opcao_item_pedido == 1:
+                                pass
+
+                            elif opcao_item_pedido == 2:
+                                pass
+
+                        except ValueError:
+                            limpar_tela()
+                            print("Oops! Parece que você digitou um caractere que não é um número, por favor tente de novo.")
+                            continue
 
                     elif opcao == 3: #Excluir item do pedido
                         pass
