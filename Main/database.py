@@ -13,7 +13,7 @@ session = Session()
 # Cria uma classe base para definir o banco de dados com mapeamento do sqlalchemy
 Base = declarative_base ()
 
-#Criando um modelo padrão para que seja possível utilizar a relação 1 para muitos 1:N
+#Criando um modelo padrão para ser possível utilizar a relação 1 para muitos 1:N
 class ModeloBase(Base):
     __abstract__ = True
     __allow_unmapped__ = True

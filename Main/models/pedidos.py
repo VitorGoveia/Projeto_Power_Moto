@@ -77,6 +77,20 @@ class Pedido(ModeloBase):
         pedido_instancia = Pedido()
         pedido_instancia.Exibir_Pedido(novo_pedido.id_Pedido)
 
+    def _retornar_lista_id_itens_pedido(self, id_pedido):
+        # Buscar os itens do pedido
+        itens_pedido = session.query(pedido_item_associacao).filter_by(id_pedido=id_pedido).all()
+
+        if not itens_pedido:
+            print("Nenhum item encontrado para este pedido.")
+            return
+
+        Lista_ids = []
+        for lista_id_item_pedido in itens_pedido:
+            Lista_ids.append(lista_id_item_pedido.id_itemPedido)
+
+        return Lista_ids
+
     def Exibir_Pedido(self, Id_pedido_inserido=None, id_item=None):
         limpar_tela()
         if Id_pedido_inserido is None:
@@ -99,42 +113,8 @@ class Pedido(ModeloBase):
         print(f"Cliente: {cliente.Nome}")
         print(f"Telefone: {cliente.Telefone}\n")
 
-        # Buscar os itens do pedido
-        itens_pedido = session.query(pedido_item_associacao).filter_by(id_pedido=pedido.id_Pedido).all()
-
-        if not itens_pedido:
-            print("Nenhum item encontrado para este pedido.")
-            return
-
-        Lista_ids = []
-        for lista_id_item_pedido in itens_pedido:
-            Lista_ids.append(lista_id_item_pedido.id_itemPedido)
-
-        for item_pedido in Lista_ids:
-            Buscar_iP = session.query(Item_Pedido).filter_by(id_itemPedido=item_pedido).first()
-            item = session.query(Item).filter_by(SKU=Buscar_iP.SKU).first()
-
-            if not item:
-                print(f"Item com SKU {item_pedido.SKU} não encontrado.")
-                continue
-
-            quantidade = Buscar_iP.quantidade
-            descricao_quantidade = f"{quantidade} UNIDADE" if quantidade == 1 else f"{quantidade} UNIDADES"
-
-            if id_item is not None:
-                print(f"Id do item: {Buscar_iP.id_itemPedido}")
-
-            print(f"{item.Nome_do_Item} ({item.SKU}) - {descricao_quantidade}")
-            print(f"Valor: R$ {Buscar_iP.Valor_ItemPedido:.2f}")
-
-            # Exibir o prazo de entrega
-            if Buscar_iP.Prazo_Pedido == 0:
-                print("Prazo: À pronta entrega\n")
-            elif Buscar_iP.Prazo_Pedido == 7:
-                print("Prazo estimado: 7 dias (transferência)\n")
-            else:
-                print(f"Prazo estimado: {Buscar_iP.Prazo_Pedido} dias úteis (encomenda)\n")
-
+        for item_pedido in self._retornar_lista_id_itens_pedido(pedido.id_Pedido):
+            itemPedido_instancia.exibir_item_pedido(item_pedido, id_item)
         print("--- Fim do Pedido ---\n")
 
     def Alterar_pedido(self):
@@ -181,19 +161,23 @@ class Pedido(ModeloBase):
                             print(
                                 "Oops! Parece que você digitou um caractere que não é um número, por favor tente de novo.")
                             continue
-                    elif opcao == 2:  # Trocar a quantidade de algum item do pedido
-                        limpar_tela()
-                        self.Exibir_Pedido(numero_pedido, "sim")
-                        try:
-                            opcao_item_pedido = int(input("""O que você deseja alterar?
-                                [ 1 ] Quantidade de item
-                                [ 2 ] Prazo
-                                Digite aqui:"""))
-                            if opcao_item_pedido == 1:
-                                pass
 
-                            elif opcao_item_pedido == 2:
-                                pass
+                    elif opcao == 2:  # Trocar a quantidade de algum item do pedido
+                        try:
+                            limpar_tela()
+                            self.Exibir_Pedido(numero_pedido, "sim")
+                            id_item_pedido = int(input("Digite o id do item que você deseja alterar: "))
+
+                            # Buscando a lista de id_item_pedido:
+                            lista_id_pedidos = self._retornar_lista_id_itens_pedido(numero_pedido)
+
+                            if id_item_pedido is None:
+                                break
+
+                            if id_item_pedido not in lista_id_pedidos:
+                                print("Deu ruim")
+
+                            itemPedido_instancia.alterar_item_pedido(id_item_pedido)
 
                         except ValueError:
                             limpar_tela()

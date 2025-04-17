@@ -60,7 +60,7 @@ while True:  # menu interativo
                 Digite aqui: """))
         except ValueError:
             limpar_tela()
-            print(("Ops! Parece que você digitou um caractere que não é número, tente novamente:"))
+            print("Ops! Parece que você digitou um caractere que não é número, tente novamente:")
             continue
 
         if opcao == 1:

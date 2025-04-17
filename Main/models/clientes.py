@@ -24,10 +24,8 @@ class Cliente(ModeloBase):
         print("Telefone já cadastrado")
 
     def _Exibir_detalhes_cliente(self, tel):
-        print()
         print(f"Nome: {tel.Nome}")
-        print(f"Telefone {tel.Telefone}")
-        print()
+        print(f"Telefone {tel.Telefone}\n")
 
     def exibir_cliente(self, Tel_cliente=None):  # Funçao somente para exibir os itens
         limpar_tela()
@@ -72,10 +70,8 @@ class Cliente(ModeloBase):
                         return
 
                     session.commit()
-                    print()
                     limpar_tela()
-                    print("Alteração feita com sucesso!")
-                    print()
+                    print("\nAlteração feita com sucesso!\n")
                     break
                 break
             else:
