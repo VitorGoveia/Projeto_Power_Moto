@@ -15,7 +15,8 @@ while True:  # menu interativo
         [ 2 ] Alterar
         [ 3 ] Exibir
         [ 4 ] Deletar
-        [ 5 ] Sair
+        [ 5 ] Adicionar
+        [ 6 ] Sair
         Digite aqui: """))
     except ValueError:
         limpar_tela()
@@ -73,8 +74,40 @@ while True:  # menu interativo
             pedido_instancia.Exibir_Pedido()
 
     elif opcao == 4:
-        pedido_instancia.Criar_pedido()
+        try:
+            opcao = int(input("""Escolha uma opção:
+            [ 1 ] Deletar Item
+            [ 2 ] Deletar Cliente
+            [ 3 ] Deletar Pedido
+            Digite aqui: """))
+        except ValueError:
+            limpar_tela()
+            print("Oops! Parece que você digitou um caractere que não é um número, por favor tente de novo.")
+            continue
+
+        if opcao == 1:
+            item_instancia.Deletar_item()
+        elif opcao == 2:
+            cliente_instancia.Deletar_cliente()
+        elif opcao == 3:
+            pedido_instancia.Deletar_pedido()
 
     elif opcao == 5:
+        try:
+            opcao = int(input("""Escolha uma opção:
+            [ 1 ] Adicionar Item
+            [ 2 ] Adicionar Cliente
+            Digite aqui: """))
+        except ValueError:
+            limpar_tela()
+            print("Oops! Parece que você digitou um caractere que não é um número, por favor tente de novo.")
+            continue
+
+        if opcao == 1:
+            item_instancia.Adicionar_Item()
+        elif opcao == 2:
+            cliente_instancia.adicionar_cliente()
+
+    elif opcao == 6:
         print("Finalizando execução")
         break

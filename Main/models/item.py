@@ -33,7 +33,7 @@ class Item(ModeloBase):
 
     # Função de exibir os detalhes -- evitar repetição de códigos
     def _Exibir_detalhes_itens(self, item):
-        print()
+
         print(f'{item.Nome_do_Item} ({item.SKU})')
         print(f'Valor: R${item.Valor_Unitario}')
         print(f'Marca: {item.Marca}')
@@ -59,7 +59,7 @@ class Item(ModeloBase):
             if not itens:
                 print("Não há itens cadastrados")
             else:
-                print('Esses são todos os itens em nosso Banco de Dados:')
+                print('Esses são todos os itens em nosso Banco de Dados:\n')
                 for item in itens:  # percorre o conjunto de matérias
                     self._Exibir_detalhes_itens(item)
 
@@ -102,3 +102,23 @@ class Item(ModeloBase):
                 buscar = input("Item não existe! Digite novamente: ")
                 if not buscar:
                     break
+
+    def Deletar_item(self):
+        from models.item_pedido import Item_Pedido
+        del_sku = input("Digite a SKU do item a ser deletado: ")
+        del_item = session.query(Item).filter_by(SKU = del_sku).first()
+        del_itens_pedido = session.query(Item_Pedido).filter_by(SKU = del_sku).first()
+
+        if not del_itens_pedido:
+            session.delete(del_item)
+            session.commit()
+
+            limpar_tela()
+            print(f"""Item deletado: 
+            SKU: {del_item.SKU}
+            Nome: {del_item.Nome_do_Item}
+            Marca: {del_item.Marca}
+            """)
+        else:
+            limpar_tela()
+            print("Impossível excluir item, já atribuído a um pedido")

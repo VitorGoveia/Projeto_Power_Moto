@@ -63,7 +63,6 @@ class Pedido(ModeloBase):
             # 🔹 Adicionando o item ao pedido corretamente
             novo_pedido.itens_pedido.append(Item_Pedido_Criado)
             print()
-            print()
             session.add(Item_Pedido_Criado)
             session.commit()  # Confirma a adição do item ao pedido
 
@@ -189,7 +188,37 @@ class Pedido(ModeloBase):
                         pass
 
                     elif opcao == 4:  # Adicionar item no pedido
-                        pass
+                        self.Exibir_Pedido(numero_pedido)
+
+                        print("Adicionar novo item no pedido:")
+
+                        resgatar_pedido = session.query(Pedido).filter_by(id_Pedido=numero_pedido).one_or_none()
+
+                        while True:
+                            # Criando um item do pedido
+                            adicionando_item = itemPedido_instancia.criar_itens_pedido()
+                            adicionando_item_pedido = session.query(Item_Pedido).filter_by(id_itemPedido=adicionando_item).first()
+
+                            # 🔹 Verificar se o item foi encontrado
+                            if not adicionando_item_pedido:
+                                print("Erro ao encontrar o item do pedido.")
+                                return
+
+                            resgatar_pedido.itens_pedido.append(adicionando_item_pedido)
+                            print()
+                            session.add(adicionando_item_pedido)
+                            session.commit()  # Confirma a adição do item ao pedido
+
+                            Continuar = input("Deseja adicionar mais um item? (S/N)").upper()
+                            if Continuar[0] != "S":
+                                print("Finalizando orçamento!")
+                                break
+
+                        # Exibir o pedido atualizado
+
+                        limpar_tela()
+                        print("Pedido atualizado: ")
+                        self.Exibir_Pedido(numero_pedido)
 
                     elif opcao == 5:
                         break

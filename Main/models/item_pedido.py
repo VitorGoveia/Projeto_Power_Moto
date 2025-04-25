@@ -49,7 +49,7 @@ class Item_Pedido(ModeloBase):
         item = session.query(Item).filter_by(SKU=Buscar_iP.SKU).first()
 
         if not item:
-            print(f"Item com SKU {item_pedido.SKU} não encontrado.")
+            print(f"Item com SKU {Buscar_iP.SKU} não encontrado.")
 
         quantidade = Buscar_iP.quantidade
         descricao_quantidade = f"{quantidade} UNIDADE" if quantidade == 1 else f"{quantidade} UNIDADES"
