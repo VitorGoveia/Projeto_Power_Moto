@@ -131,7 +131,7 @@ class Pedido(ModeloBase):
                     try:
                         opcao = int(input("""Escolha o que você deseja alterar no pedido:
                             [ 1 ] Alterar Cliente
-                            [ 2 ] Alterar quantidade do Item de Pedido
+                            [ 2 ] Alterar quantidade ou prazo do Item de Pedido
                             [ 3 ] Excluir item do pedido
                             [ 4 ] Acrescentar item no pedido
                             [ 5 ] Voltar ao página principal
@@ -185,7 +185,13 @@ class Pedido(ModeloBase):
                             continue
 
                     elif opcao == 3:  # Excluir item do pedido
-                        pass
+                        self.Exibir_Pedido(numero_pedido, "sim")
+
+                        del_id_item_pedido = input("Digite o Id do item que será retirado: ")
+                        itemPedido_instancia.deletar_item_pedido(del_id_item_pedido)
+                        limpar_tela()
+
+                        self.Exibir_Pedido(numero_pedido, "sim")
 
                     elif opcao == 4:  # Adicionar item no pedido
                         self.Exibir_Pedido(numero_pedido)
@@ -232,4 +238,24 @@ class Pedido(ModeloBase):
                 print()
                 break
 
-        # POSSO CRIAR UMA LISTA COM TODOS OS ID DO ITEM DO PEDIDO e depois chamar na query com um for, então a função exibir deve receber uma lista e não um ID apenas
+    def deletar_pedido(self):
+        del_id_pedido = int(input("Digite o id do pedido que será deletado: "))
+        del_pedido = session.query(Pedido).filter_by(id_Pedido = del_id_pedido).first()
+
+        self.Exibir_Pedido(del_id_pedido)
+        confirma = input("\nVocê tem certeza que deseja deletar o pedido? (S/N) ").upper()
+
+        if not del_pedido:
+            print("Pedido não encontrado")
+
+        if confirma[0] == "S":
+            del_itens_pedido = session.query(pedido_item_associacao).filter_by(id_pedido = del_id_pedido).all()
+
+            for item_pedido in del_itens_pedido:
+                itemPedido_instancia.deletar_item_pedido(item_pedido.id_itemPedido)
+
+            session.delete(del_pedido)
+
+            session.commit()
+
+        print(f"""Orçamento {del_id_pedido} deletado!""")

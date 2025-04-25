@@ -78,3 +78,25 @@ class Cliente(ModeloBase):
                 tel_cliente = input("Item não existe! Digite novamente: ")
                 if not tel_cliente:
                     break
+
+    def Deletar_cliente(self):
+        from models.pedidos import Pedido
+        del_telefone = input("Digite o telefone do cliente que será deletado: ")
+
+        del_cliente = session.query(Cliente).filter_by(Telefone = del_telefone).first()
+        del_pedido = session.query(Pedido).filter_by(Telefone_Cliente = del_telefone).first()
+
+        if not del_cliente:
+            print("Cliente não encontrado")
+
+        if not del_pedido:
+            session.delete(del_cliente)
+            session.commit()
+
+            limpar_tela()
+            print(f"""Cliente deletado: 
+    Telefone: {del_cliente.Telefone}
+    Nome: {del_cliente.Nome}""")
+        else:
+            limpar_tela()
+            print("Impossível excluir cliente, já atribuído a um pedido")

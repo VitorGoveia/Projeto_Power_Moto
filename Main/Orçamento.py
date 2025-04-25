@@ -90,7 +90,7 @@ while True:  # menu interativo
         elif opcao == 2:
             cliente_instancia.Deletar_cliente()
         elif opcao == 3:
-            pedido_instancia.Deletar_pedido()
+            pedido_instancia.deletar_pedido()
 
     elif opcao == 5:
         try:

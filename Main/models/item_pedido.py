@@ -96,3 +96,12 @@ class Item_Pedido(ModeloBase):
 
         session.commit()
         print("\n Alteração feita com sucesso!")
+
+    def deletar_item_pedido(self, del_id_item_pedido = None):
+        if del_id_item_pedido is None:
+            del_id_item_pedido = int(input("Digite o id do item que será deletado: "))
+
+        del_item_pedido = session.query(Item_Pedido).filter_by(id_itemPedido = del_id_item_pedido).first()
+
+        session.delete(del_item_pedido)
+        session.commit()

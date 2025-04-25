@@ -109,16 +109,18 @@ class Item(ModeloBase):
         del_item = session.query(Item).filter_by(SKU = del_sku).first()
         del_itens_pedido = session.query(Item_Pedido).filter_by(SKU = del_sku).first()
 
+        if not del_item:
+            print("Item não encontrado!")
+
         if not del_itens_pedido:
             session.delete(del_item)
             session.commit()
 
             limpar_tela()
             print(f"""Item deletado: 
-            SKU: {del_item.SKU}
-            Nome: {del_item.Nome_do_Item}
-            Marca: {del_item.Marca}
-            """)
+    SKU: {del_item.SKU}
+    Nome: {del_item.Nome_do_Item}
+    Marca: {del_item.Marca}""")
         else:
             limpar_tela()
             print("Impossível excluir item, já atribuído a um pedido")
