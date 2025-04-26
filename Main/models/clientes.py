@@ -9,13 +9,13 @@ class Cliente(ModeloBase):
     Telefone = Column(String, primary_key=True)
 
     def adicionar_cliente(self):
-        Nome_cliente = input("Digite o nome do cliente a ser cadastrado: ")
-        Telefone_cliente = input("Digite o telefone (somente número): ")
+        nome_cliente = input("Digite o nome do cliente a ser cadastrado: ")
+        telefone_cliente = input("Digite o telefone (somente número): ")
 
-        criar_cliente = session.query(Cliente).filter_by(Telefone=Telefone_cliente).first()
+        criar_cliente = session.query(Cliente).filter_by(Telefone=telefone_cliente).first()
         if not criar_cliente:
-            criar_cliente = Cliente(Nome=Nome_cliente,
-                                    Telefone=Telefone_cliente)
+            criar_cliente = Cliente(Nome=nome_cliente,
+                                    Telefone=telefone_cliente)
             session.add(criar_cliente)
             session.commit()
             print("Cliente cadastrado!")
@@ -27,15 +27,15 @@ class Cliente(ModeloBase):
         print(f"Nome: {tel.Nome}")
         print(f"Telefone {tel.Telefone}\n")
 
-    def exibir_cliente(self, Tel_cliente=None):  # Funçao somente para exibir os itens
+    def exibir_cliente(self, tel_cliente=None):  # Funçao somente para exibir os itens
         limpar_tela()
-        if Tel_cliente is None:
-            Tel_cliente = input("Digite o Telefone a ser verificado (não digite nada para todos): ")
+        if tel_cliente is None:
+            tel_cliente = input("Digite o Telefone a ser verificado (não digite nada para todos): ")
 
-        if Tel_cliente:
-            Cli = session.query(Cliente).filter_by(Telefone=Tel_cliente).first()
-            if Cli:
-                self._Exibir_detalhes_cliente(Cli)
+        if tel_cliente:
+            cli = session.query(Cliente).filter_by(Telefone=tel_cliente).first()
+            if cli:
+                self._Exibir_detalhes_cliente(cli)
                 return
             else:
                 print()
@@ -43,8 +43,8 @@ class Cliente(ModeloBase):
                 print()
                 return
         else:
-            Cli = session.query(Cliente).all()
-            for cliente_dado in Cli:  # percorre o conjunto de matérias
+            cli = session.query(Cliente).all()
+            for cliente_dado in cli:  # percorre o conjunto de matérias
                 self._Exibir_detalhes_cliente(cliente_dado)
 
     def Alterar_cliente(self, tel_cliente=None):

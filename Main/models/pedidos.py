@@ -4,10 +4,9 @@ from database import ModeloBase, session, Base
 from Utilidades.Funcoes import limpar_tela
 
 from models.clientes import Cliente
-from models.item import Item
-from models.item_pedido import Item_Pedido
+from models.item_pedido import ItemPedido
 
-#Tabela de associação Pedido e Item_Pedido
+#Tabela de associação Pedido e ItemPedido
 pedido_item_associacao = Table(
     'pedido_item_associacao', Base.metadata,
     Column('id_pedido', Integer, ForeignKey('pedidos.id_Pedido')),
@@ -16,7 +15,7 @@ pedido_item_associacao = Table(
 
 #Criando Instâncias:
 cliente_instancia = Cliente()
-itemPedido_instancia = Item_Pedido()
+itemPedido_instancia = ItemPedido()
 
 # Tabela de Pedido:
 
@@ -27,49 +26,48 @@ class Pedido(ModeloBase):
     Telefone_Cliente = Column(Integer, ForeignKey("cliente.Telefone"))
 
     cliente = relationship("Cliente", backref="pedidos")
-    itens_pedido = relationship("Item_Pedido", secondary=pedido_item_associacao, backref="pedidos")
+    itens_pedido = relationship("ItemPedido", secondary=pedido_item_associacao, backref="pedidos")
 
     def Criar_pedido(self):
         # Atribuir cliente
-        Atribui_cliente = input("Digite o número do cliente do orçamento: ")
+        atribui_cliente = input("Digite o número do cliente do orçamento: ")
         while True:
-            Cliente_orc = session.query(Cliente).filter_by(Telefone=Atribui_cliente).first()
-            if Cliente_orc:
-                print(Cliente_orc.Nome)
+            cliente_orc = session.query(Cliente).filter_by(Telefone=atribui_cliente).first()
+            if cliente_orc:
+                print(cliente_orc.Nome)
                 break
             else:
-                Cadastrar = input("Cliente não encontrado! Deseja cadastrar? (S/N)").upper()
-                if Cadastrar[0] == "S":
+                cadastrar = input("Cliente não encontrado! Deseja cadastrar? (S/N)").upper()
+                if cadastrar[0] == "S":
                     cliente_instancia.adicionar_cliente()
                 else:
-                    Atribui_cliente = input("Digite novamente o número do cliente do orçamento: ")
+                    atribui_cliente = input("Digite novamente o número do cliente do orçamento: ")
 
-        # Criando um novo pedido e adicionando à sessão
-        novo_pedido = Pedido(Telefone_Cliente=Cliente_orc.Telefone)
+        # Criando um pedido e adicionando à sessão
+        novo_pedido = Pedido(Telefone_Cliente=cliente_orc.Telefone)
         session.add(novo_pedido)
         session.commit()  # Garante que o pedido já tenha um ID antes de adicionar itens
 
-        print("Atribuindo itens ao orçamento")
+        print("Atribuindo itens ao orçamento, para finalizar basta não digitar a SKU!")
         while True:
             # Criando um item do pedido
-            Id_criado = itemPedido_instancia.criar_itens_pedido()
-            Item_Pedido_Criado = session.query(Item_Pedido).filter_by(id_itemPedido=Id_criado).first()
+            id_criado = itemPedido_instancia.criar_itens_pedido()
+            item_Pedido_Criado = session.query(ItemPedido).filter_by(id_itemPedido=id_criado).first()
+
+            if not id_criado:
+                print("Finalizando orçamento!")
+                break
 
             # 🔹 Verificar se o item foi encontrado
-            if not Item_Pedido_Criado:
+            if not item_Pedido_Criado:
                 print("Erro ao encontrar o item do pedido.")
                 return
 
             # 🔹 Adicionando o item ao pedido corretamente
-            novo_pedido.itens_pedido.append(Item_Pedido_Criado)
+            novo_pedido.itens_pedido.append(item_Pedido_Criado)
             print()
-            session.add(Item_Pedido_Criado)
+            session.add(item_Pedido_Criado)
             session.commit()  # Confirma a adição do item ao pedido
-
-            Continuar = input("Deseja adicionar mais um item? (S/N)").upper()
-            if Continuar[0] != "S":
-                print("Finalizando orçamento!")
-                break
 
         # Exibir o pedido
 
@@ -82,20 +80,20 @@ class Pedido(ModeloBase):
 
         if not itens_pedido:
             print("Nenhum item encontrado para este pedido.")
-            return
+            return None
 
-        Lista_ids = []
+        lista_ids = []
         for lista_id_item_pedido in itens_pedido:
-            Lista_ids.append(lista_id_item_pedido.id_itemPedido)
+            lista_ids.append(lista_id_item_pedido.id_itemPedido)
 
-        return Lista_ids
+        return lista_ids
 
-    def Exibir_Pedido(self, Id_pedido_inserido=None, id_item=None):
+    def Exibir_Pedido(self, id_pedido_inserido=None, id_item=None):
         limpar_tela()
-        if Id_pedido_inserido is None:
-            Id_pedido_inserido = input("Digite o Id pedido: ")
-        # Buscar o pedido pelo ID
-        pedido = session.query(Pedido).filter_by(id_Pedido=Id_pedido_inserido).first()
+        if id_pedido_inserido is None:
+            id_pedido_inserido = input("Digite o Id pedido: ")
+        # Buscar o pedido pelo "ID"
+        pedido = session.query(Pedido).filter_by(id_Pedido=id_pedido_inserido).first()
 
         if not pedido:
             print("Pedido não encontrado.")
@@ -112,8 +110,12 @@ class Pedido(ModeloBase):
         print(f"Cliente: {cliente.Nome}")
         print(f"Telefone: {cliente.Telefone}\n")
 
+        valor_total = 0
         for item_pedido in self._retornar_lista_id_itens_pedido(pedido.id_Pedido):
             itemPedido_instancia.exibir_item_pedido(item_pedido, id_item)
+            valor_total += itemPedido_instancia.retorna_valor(item_pedido)
+
+        print(f"Total: {str(valor_total)}\n".replace(".",","))
         print("--- Fim do Pedido ---\n")
 
     def Alterar_pedido(self):
@@ -203,7 +205,7 @@ class Pedido(ModeloBase):
                         while True:
                             # Criando um item do pedido
                             adicionando_item = itemPedido_instancia.criar_itens_pedido()
-                            adicionando_item_pedido = session.query(Item_Pedido).filter_by(id_itemPedido=adicionando_item).first()
+                            adicionando_item_pedido = session.query(ItemPedido).filter_by(id_itemPedido=adicionando_item).first()
 
                             # 🔹 Verificar se o item foi encontrado
                             if not adicionando_item_pedido:
@@ -215,8 +217,8 @@ class Pedido(ModeloBase):
                             session.add(adicionando_item_pedido)
                             session.commit()  # Confirma a adição do item ao pedido
 
-                            Continuar = input("Deseja adicionar mais um item? (S/N)").upper()
-                            if Continuar[0] != "S":
+                            continuar = input("Deseja adicionar mais um item? (S/N)").upper()
+                            if continuar[0] != "S":
                                 print("Finalizando orçamento!")
                                 break
 

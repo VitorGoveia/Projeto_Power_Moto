@@ -6,7 +6,7 @@ from models.item import Item  # Para validar SKU
 
 item_instancia = Item()
 
-class Item_Pedido(ModeloBase):
+class ItemPedido(ModeloBase):
     __tablename__ = 'item_pedido'
 
     id_itemPedido = Column(Integer, primary_key=True, autoincrement=True)
@@ -20,56 +20,66 @@ class Item_Pedido(ModeloBase):
     def criar_itens_pedido(self):
         while True:
             sku_item = input("Digite a SKU do item: ")
-            Valida_Sku = session.query(Item).filter_by(SKU=sku_item).first()
-            if Valida_Sku:
+
+            if not sku_item:
+                return None
+
+            valida_sku = session.query(Item).filter_by(SKU=sku_item).first()
+            if valida_sku:
                 break
             print("Item não encontrado, favor cadastrar:")
 
             item_instancia.Adicionar_Item()
 
-        Quantidade_Item_Pedido = int(input("Digite a quantidade do item: "))
-        Valor_Item_Pedido = Valida_Sku.Valor_Unitario * Quantidade_Item_Pedido
-        Prazo = int(input("Digite o prazo máximo (em dias): "))
+        while True:
+            quantidade_item_pedido = int(input("Digite a quantidade do item: "))
+            if quantidade_item_pedido == 0:
+                print("Impossível a quantidade ser 0, digite novamente!\n")
+            else:
+                break
 
-        Criar_Item = Item_Pedido(SKU=Valida_Sku.SKU,
-                                 quantidade=Quantidade_Item_Pedido,
-                                 Valor_ItemPedido=Valor_Item_Pedido,
-                                 Prazo_Pedido=Prazo)
-        session.add(Criar_Item)
+        valor_item_pedido = valida_sku.Valor_Unitario * quantidade_item_pedido
+        prazo = int(input("Digite o prazo máximo (em dias): "))
+
+        criar_item = ItemPedido(SKU=valida_sku.SKU,
+                                 quantidade=quantidade_item_pedido,
+                                 Valor_ItemPedido=valor_item_pedido,
+                                 Prazo_Pedido=prazo)
+        session.add(criar_item)
         session.commit()
 
-        # Retornando o id para adicionar ao orçamento
-        Return_Id_session = session.query(Item_Pedido).order_by(desc(Item_Pedido.id_itemPedido)).first()
-        Return_Id = Return_Id_session.id_itemPedido
+        # Retornando o "id" para adicionar ao orçamento
+        return_id_session = session.query(ItemPedido).order_by(desc(ItemPedido.id_itemPedido)).first()
+        return_id = return_id_session.id_itemPedido
 
-        return Return_Id
+        return return_id
 
     def exibir_item_pedido(self, item_pedido, id_item=None): #id
-        Buscar_iP = session.query(Item_Pedido).filter_by(id_itemPedido=item_pedido).first()
-        item = session.query(Item).filter_by(SKU=Buscar_iP.SKU).first()
+        buscar_ip = session.query(ItemPedido).filter_by(id_itemPedido=item_pedido).first()
+        item = session.query(Item).filter_by(SKU=buscar_ip.SKU).first()
 
         if not item:
-            print(f"Item com SKU {Buscar_iP.SKU} não encontrado.")
+            print(f"Item com SKU {buscar_ip.SKU} não encontrado.")
 
-        quantidade = Buscar_iP.quantidade
+        quantidade = buscar_ip.quantidade
         descricao_quantidade = f"{quantidade} UNIDADE" if quantidade == 1 else f"{quantidade} UNIDADES"
 
         if id_item is not None:
-            print(f"Id do item: {Buscar_iP.id_itemPedido}")
+            print(f"Id do item: {buscar_ip.id_itemPedido}")
 
         print(f"{item.Nome_do_Item} ({item.SKU}) - {descricao_quantidade}")
-        print(f"Valor: R$ {Buscar_iP.Valor_ItemPedido:.2f}")
+        print(f"Valor: R$ {buscar_ip.Valor_ItemPedido:.2f}".replace('.', ','))
 
         # Exibir o prazo de entrega
-        if Buscar_iP.Prazo_Pedido == 0:
+        if buscar_ip.Prazo_Pedido == 0:
             print("Prazo: À pronta entrega\n")
-        elif Buscar_iP.Prazo_Pedido == 7:
+        elif buscar_ip.Prazo_Pedido == 7:
             print("Prazo estimado: 7 dias (transferência)\n")
         else:
-            print(f"Prazo estimado: {Buscar_iP.Prazo_Pedido} dias úteis (encomenda)\n")
+            print(f"Prazo estimado: {buscar_ip.Prazo_Pedido} dias úteis (encomenda)\n")
 
-    def alterar_item_pedido(self, id_itemPedido_externo):
-        item_pedido = session.query(Item_Pedido).filter_by(id_itemPedido = id_itemPedido_externo).first()
+    def alterar_item_pedido(self, id_item_pedido_externo):
+        item_pedido = session.query(ItemPedido).filter_by(id_itemPedido = id_item_pedido_externo).first()
         item_atribuido = session.query(Item).filter_by(SKU = item_pedido.SKU).first()
         limpar_tela()
         self.exibir_item_pedido(item_pedido.id_itemPedido)
@@ -101,7 +111,11 @@ class Item_Pedido(ModeloBase):
         if del_id_item_pedido is None:
             del_id_item_pedido = int(input("Digite o id do item que será deletado: "))
 
-        del_item_pedido = session.query(Item_Pedido).filter_by(id_itemPedido = del_id_item_pedido).first()
+        del_item_pedido = session.query(ItemPedido).filter_by(id_itemPedido = del_id_item_pedido).first()
 
         session.delete(del_item_pedido)
         session.commit()
+
+    def retorna_valor(self, id_item_pedido):
+        item_pedido_val = session.query(ItemPedido).filter_by(id_itemPedido = id_item_pedido).first()
+        return item_pedido_val.Valor_ItemPedido

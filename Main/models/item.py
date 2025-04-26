@@ -14,28 +14,32 @@ class Item(ModeloBase):
 
     def Adicionar_Item(self):
         sku_item = input('Digite a SKU do item: ')
-        Nome = input('Digite o nome do item: ')
-        Valor = float(input('Agora digite o valor unitário do item (com .):'))
-        Marca_item = input('Digite a marca do item: ')
+        nome = input('Digite o nome do item: ').capitalize()
+        valor = input('Agora digite o valor unitário do item (com .):').replace(",",".")
+        float(valor)
+        marca_item = input('Digite a marca do item: ').capitalize()
 
-        criar_item = session.query(Item).filter_by(SKU=sku_item).first()
-        if criar_item:
-            print("Já há um item com essa SKU!")
+        if not (sku_item or nome or valor or marca_item):
+            print("Algum valor está em branco, operação cancelada")
         else:
-            criar_item = Item(SKU=sku_item,
-                              Nome_do_Item=Nome,
-                              Valor_Unitario=Valor,
-                              Marca=Marca_item)
-            session.add(criar_item)
-            session.commit()
-            print("Item adicionado com sucesso")
-            print()
+            criar_item = session.query(Item).filter_by(SKU=sku_item).first()
+            if criar_item:
+                print("Já há um item com essa SKU!")
+            else:
+                criar_item = Item(SKU=sku_item,
+                                  Nome_do_Item=nome,
+                                  Valor_Unitario=valor,
+                                  Marca=marca_item)
+                session.add(criar_item)
+                session.commit()
+                print("Item adicionado com sucesso")
+                print()
 
     # Função de exibir os detalhes -- evitar repetição de códigos
     def _Exibir_detalhes_itens(self, item):
 
         print(f'{item.Nome_do_Item} ({item.SKU})')
-        print(f'Valor: R${item.Valor_Unitario}')
+        print(f'Valor: R${str(item.Valor_Unitario).replace(".",",")}')
         print(f'Marca: {item.Marca}')
         print()
 
@@ -104,10 +108,10 @@ class Item(ModeloBase):
                     break
 
     def Deletar_item(self):
-        from models.item_pedido import Item_Pedido
+        from models.item_pedido import ItemPedido
         del_sku = input("Digite a SKU do item a ser deletado: ")
         del_item = session.query(Item).filter_by(SKU = del_sku).first()
-        del_itens_pedido = session.query(Item_Pedido).filter_by(SKU = del_sku).first()
+        del_itens_pedido = session.query(ItemPedido).filter_by(SKU = del_sku).first()
 
         if not del_item:
             print("Item não encontrado!")

@@ -3,7 +3,7 @@ from Utilidades.Funcoes import limpar_tela
 
 from models.item import Item
 from models.clientes import Cliente
-from models.item_pedido import Item_Pedido
+from models.item_pedido import ItemPedido
 from models.pedidos import Pedido
 
 Base.metadata.create_all(engine)  # Cria todas as tabelas definidas na classe base no banco de dados, se ainda não existirem
@@ -26,7 +26,7 @@ while True:  # menu interativo
     #Instânciando as tabelas
     item_instancia = Item()
     cliente_instancia = Cliente()
-    itemPedido_instancia = Item_Pedido()
+    itemPedido_instancia = ItemPedido()
     pedido_instancia = Pedido()
     
     if opcao == 1:
