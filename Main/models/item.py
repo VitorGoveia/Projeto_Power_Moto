@@ -3,7 +3,6 @@ from sqlalchemy import Column, String, Numeric
 from Utilidades.Funcoes import limpar_tela
 
 #Tabela de item:
-
 class Item(ModeloBase):
     __tablename__ = 'itens'
 
@@ -12,18 +11,30 @@ class Item(ModeloBase):
     Nome_do_Item = Column(String)
     Marca = Column(String)
 
-    def Adicionar_Item(self):
+    def adicionar_Item(self):
+        """Realiza a criação do item, valida se tem algum dado faltando"""
+
         sku_item = input('Digite a SKU do item: ')
         nome = input('Digite o nome do item: ').capitalize()
-        valor = input('Agora digite o valor unitário do item (com .):').replace(",",".")
-        float(valor)
+
+        while True:
+            #Resgata o valor em formato de texto, dessa forma o usuário poderá digitar o valor com uma vírgula
+            valor = input('Agora digite o valor unitário do item (com .):').replace(",",".")
+            float(valor) #converte o valor de STR para FLOAT
+            if valor != 0:
+                break
+            else:
+                print("Valor do item não pode ser 0")
+
         marca_item = input('Digite a marca do item: ').capitalize()
+
+        #.capitalize() para deixar apenas a primeira letra da frase em maiúsculo
 
         if not (sku_item or nome or valor or marca_item):
             print("Algum valor está em branco, operação cancelada")
         else:
             criar_item = session.query(Item).filter_by(SKU=sku_item).first()
-            if criar_item:
+            if criar_item: # Valida se já tem um item com a SKU digitada
                 print("Já há um item com essa SKU!")
             else:
                 criar_item = Item(SKU=sku_item,
@@ -35,24 +46,22 @@ class Item(ModeloBase):
                 print("Item adicionado com sucesso")
                 print()
 
-    # Função de exibir os detalhes -- evitar repetição de códigos
-    def _Exibir_detalhes_itens(self, item):
+    def _exibir_detalhes_itens(self, item):
+        """Função de exibir os detalhes (privada)"""
 
         print(f'{item.Nome_do_Item} ({item.SKU})')
         print(f'Valor: R${str(item.Valor_Unitario).replace(".",",")}')
         print(f'Marca: {item.Marca}')
         print()
 
-        # Funçao somente para exibir os itens
-
-    def Exibir_item(self):
+    def exibir_item(self):
         limpar_tela()
         buscar = input("Digite a SKU do item ou deixe em branco para todos: ")
         if buscar:
             while True:
                 item = session.query(Item).filter_by(SKU=buscar).first()
                 if item:
-                    self._Exibir_detalhes_itens(item)
+                    self._exibir_detalhes_itens(item)
                     break
                 else:
                     buscar = input("Item não existe! Digite novamente: ")
@@ -65,17 +74,16 @@ class Item(ModeloBase):
             else:
                 print('Esses são todos os itens em nosso Banco de Dados:\n')
                 for item in itens:  # percorre o conjunto de matérias
-                    self._Exibir_detalhes_itens(item)
+                    self._exibir_detalhes_itens(item)
 
-    # Funçao somente para alterar um item:
-    def Alterar_item(self):
+    def alterar_item(self):
         buscar = input("Digite a SKU do item que será alterado: ")
         while True:
             item = session.query(Item).filter_by(SKU=buscar).one_or_none()
             if not item:
                 print("Erro: Nenhum item encontrado com essa SKU!")
             else:
-                self._Exibir_detalhes_itens(item)
+                self._exibir_detalhes_itens(item)
             if item:
                 while True:
                     try:
@@ -107,7 +115,7 @@ class Item(ModeloBase):
                 if not buscar:
                     break
 
-    def Deletar_item(self):
+    def deletar_item(self):
         from models.item_pedido import ItemPedido
         del_sku = input("Digite a SKU do item a ser deletado: ")
         del_item = session.query(Item).filter_by(SKU = del_sku).first()
@@ -127,4 +135,6 @@ class Item(ModeloBase):
     Marca: {del_item.Marca}""")
         else:
             limpar_tela()
+
+            """Itens já atribuidos a pedidos não podem ser apagados para não deixar o banco com valores nulls"""
             print("Impossível excluir item, já atribuído a um pedido")

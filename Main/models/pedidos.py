@@ -28,7 +28,7 @@ class Pedido(ModeloBase):
     cliente = relationship("Cliente", backref="pedidos")
     itens_pedido = relationship("ItemPedido", secondary=pedido_item_associacao, backref="pedidos")
 
-    def Criar_pedido(self):
+    def criar_pedido(self):
         # Atribuir cliente
         atribui_cliente = input("Digite o número do cliente do orçamento: ")
         while True:
@@ -52,30 +52,29 @@ class Pedido(ModeloBase):
         while True:
             # Criando um item do pedido
             id_criado = itemPedido_instancia.criar_itens_pedido()
-            item_Pedido_Criado = session.query(ItemPedido).filter_by(id_itemPedido=id_criado).first()
+            item_pedido_criado = session.query(ItemPedido).filter_by(id_itemPedido=id_criado).first()
 
             if not id_criado:
                 print("Finalizando orçamento!")
                 break
 
-            # 🔹 Verificar se o item foi encontrado
-            if not item_Pedido_Criado:
+            #Verifica se o item foi encontrado
+            if not item_pedido_criado:
                 print("Erro ao encontrar o item do pedido.")
                 return
 
-            # 🔹 Adicionando o item ao pedido corretamente
-            novo_pedido.itens_pedido.append(item_Pedido_Criado)
+            #Adiciona o item ao pedido corretamente
+            novo_pedido.itens_pedido.append(item_pedido_criado)
             print()
-            session.add(item_Pedido_Criado)
+            session.add(item_pedido_criado)
             session.commit()  # Confirma a adição do item ao pedido
 
-        # Exibir o pedido
-
+        #Exibe o pedido
         pedido_instancia = Pedido()
-        pedido_instancia.Exibir_Pedido(novo_pedido.id_Pedido)
+        pedido_instancia.exibir_Pedido(novo_pedido.id_Pedido)
 
     def _retornar_lista_id_itens_pedido(self, id_pedido):
-        # Buscar os itens do pedido
+        #Buscar os itens do pedido
         itens_pedido = session.query(pedido_item_associacao).filter_by(id_pedido=id_pedido).all()
 
         if not itens_pedido:
@@ -88,18 +87,19 @@ class Pedido(ModeloBase):
 
         return lista_ids
 
-    def Exibir_Pedido(self, id_pedido_inserido=None, id_item=None):
+    def exibir_pedido(self, id_pedido_inserido=None, id_item=None):
         limpar_tela()
         if id_pedido_inserido is None:
             id_pedido_inserido = input("Digite o Id pedido: ")
-        # Buscar o pedido pelo "ID"
+
+        #Busca o pedido pelo "ID"
         pedido = session.query(Pedido).filter_by(id_Pedido=id_pedido_inserido).first()
 
         if not pedido:
             print("Pedido não encontrado.")
             return
 
-        # Buscar o cliente associado ao pedido
+        #Busca o cliente associado ao pedido
         cliente = session.query(Cliente).filter_by(Telefone=pedido.Telefone_Cliente).first()
 
         if not cliente:
@@ -118,7 +118,7 @@ class Pedido(ModeloBase):
         print(f"Total: {str(valor_total)}\n".replace(".",","))
         print("--- Fim do Pedido ---\n")
 
-    def Alterar_pedido(self):
+    def alterar_pedido(self):
         numero_pedido = input("Digite o número do pedido: ")
         while True:
             pedido = session.query(Pedido).filter_by(id_Pedido=numero_pedido).one_or_none()
@@ -129,7 +129,7 @@ class Pedido(ModeloBase):
 
             if pedido:
                 while True:
-                    self.Exibir_Pedido(numero_pedido)
+                    self.exibir_Pedido(numero_pedido)
                     try:
                         opcao = int(input("""Escolha o que você deseja alterar no pedido:
                             [ 1 ] Alterar Cliente
@@ -156,20 +156,20 @@ class Pedido(ModeloBase):
 
                                 print("\nCliente alterado com sucesso!")
                             elif opcao_cliente == 2:
-                                cliente_instancia.Alterar_cliente(pedido.Telefone_Cliente)
+                                cliente_instancia.alterar_cliente(pedido.Telefone_Cliente)
                         except ValueError:
                             limpar_tela()
                             print(
                                 "Oops! Parece que você digitou um caractere que não é um número, por favor tente de novo.")
                             continue
 
-                    elif opcao == 2:  # Trocar a quantidade de algum item do pedido
+                    elif opcao == 2:  #Troca a quantidade de algum item do pedido
                         try:
                             limpar_tela()
-                            self.Exibir_Pedido(numero_pedido, "sim")
+                            self.exibir_Pedido(numero_pedido, "sim")
                             id_item_pedido = int(input("Digite o id do item que você deseja alterar: "))
 
-                            # Buscando a lista de id_item_pedido:
+                            #Busca a lista de id_item_pedido:
                             lista_id_pedidos = self._retornar_lista_id_itens_pedido(numero_pedido)
 
                             if id_item_pedido is None:
@@ -186,28 +186,28 @@ class Pedido(ModeloBase):
                                 "Oops! Parece que você digitou um caractere que não é um número, por favor tente de novo.")
                             continue
 
-                    elif opcao == 3:  # Excluir item do pedido
-                        self.Exibir_Pedido(numero_pedido, "sim")
+                    elif opcao == 3:  #Exclui item do pedido
+                        self.exibir_Pedido(numero_pedido, "sim")
 
                         del_id_item_pedido = input("Digite o Id do item que será retirado: ")
                         itemPedido_instancia.deletar_item_pedido(del_id_item_pedido)
                         limpar_tela()
 
-                        self.Exibir_Pedido(numero_pedido, "sim")
+                        self.exibir_Pedido(numero_pedido, "sim")
 
-                    elif opcao == 4:  # Adicionar item no pedido
-                        self.Exibir_Pedido(numero_pedido)
+                    elif opcao == 4:  # Adiciona item no pedido
+                        self.exibir_Pedido(numero_pedido)
 
                         print("Adicionar novo item no pedido:")
 
                         resgatar_pedido = session.query(Pedido).filter_by(id_Pedido=numero_pedido).one_or_none()
 
                         while True:
-                            # Criando um item do pedido
+                            #Cria um item do pedido
                             adicionando_item = itemPedido_instancia.criar_itens_pedido()
                             adicionando_item_pedido = session.query(ItemPedido).filter_by(id_itemPedido=adicionando_item).first()
 
-                            # 🔹 Verificar se o item foi encontrado
+                            #Verifica se o item foi encontrado
                             if not adicionando_item_pedido:
                                 print("Erro ao encontrar o item do pedido.")
                                 return
@@ -222,11 +222,10 @@ class Pedido(ModeloBase):
                                 print("Finalizando orçamento!")
                                 break
 
-                        # Exibir o pedido atualizado
-
+                        #Exibe o pedido atualizado
                         limpar_tela()
                         print("Pedido atualizado: ")
-                        self.Exibir_Pedido(numero_pedido)
+                        self.exibir_pedido(numero_pedido)
 
                     elif opcao == 5:
                         break
@@ -244,7 +243,7 @@ class Pedido(ModeloBase):
         del_id_pedido = int(input("Digite o id do pedido que será deletado: "))
         del_pedido = session.query(Pedido).filter_by(id_Pedido = del_id_pedido).first()
 
-        self.Exibir_Pedido(del_id_pedido)
+        self.exibir_Pedido(del_id_pedido)
         confirma = input("\nVocê tem certeza que deseja deletar o pedido? (S/N) ").upper()
 
         if not del_pedido:

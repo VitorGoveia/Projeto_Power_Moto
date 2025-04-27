@@ -31,7 +31,7 @@ while True:  # menu interativo
     
     if opcao == 1:
         limpar_tela()
-        pedido_instancia.Criar_pedido()
+        pedido_instancia.criar_pedido()
         
     elif opcao == 2:
         try:
@@ -46,11 +46,11 @@ while True:  # menu interativo
             continue
 
         if opcao == 1:
-            item_instancia.Alterar_item()
+            item_instancia.alterar_item()
         elif opcao == 2:
-            cliente_instancia.Alterar_cliente()
+            cliente_instancia.alterar_cliente()
         elif opcao == 3:
-            pedido_instancia.Alterar_pedido()
+            pedido_instancia.alterar_pedido()
 
     elif opcao == 3:
         try:
@@ -65,13 +65,13 @@ while True:  # menu interativo
             continue
 
         if opcao == 1:
-            item_instancia.Exibir_item()
+            item_instancia.exibir_item()
 
         elif opcao == 2:
             cliente_instancia.exibir_cliente()
 
         elif opcao == 3:
-            pedido_instancia.Exibir_Pedido()
+            pedido_instancia.exibir_pedido()
 
     elif opcao == 4:
         try:
@@ -86,9 +86,9 @@ while True:  # menu interativo
             continue
 
         if opcao == 1:
-            item_instancia.Deletar_item()
+            item_instancia.deletar_item()
         elif opcao == 2:
-            cliente_instancia.Deletar_cliente()
+            cliente_instancia.deletar_cliente()
         elif opcao == 3:
             pedido_instancia.deletar_pedido()
 
@@ -104,7 +104,7 @@ while True:  # menu interativo
             continue
 
         if opcao == 1:
-            item_instancia.Adicionar_Item()
+            item_instancia.adicionar_Item()
         elif opcao == 2:
             cliente_instancia.adicionar_cliente()
 

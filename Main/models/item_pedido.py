@@ -22,14 +22,14 @@ class ItemPedido(ModeloBase):
             sku_item = input("Digite a SKU do item: ")
 
             if not sku_item:
-                return None
+                return None #Essa validação de return None, serve para finalizar a adição de itens no Pedido
 
             valida_sku = session.query(Item).filter_by(SKU=sku_item).first()
             if valida_sku:
                 break
-            print("Item não encontrado, favor cadastrar:")
+            print("Item não encontrado, favor cadastrar:") #Se a SKU existe dá continuidade, se não cadastra o item
 
-            item_instancia.Adicionar_Item()
+            item_instancia.adicionar_Item()
 
         while True:
             quantidade_item_pedido = int(input("Digite a quantidade do item: "))
@@ -55,6 +55,7 @@ class ItemPedido(ModeloBase):
         return return_id
 
     def exibir_item_pedido(self, item_pedido, id_item=None): #id
+        """Busca o ip (item Pedido), para poder exibir ele de forma unitária"""
         buscar_ip = session.query(ItemPedido).filter_by(id_itemPedido=item_pedido).first()
         item = session.query(Item).filter_by(SKU=buscar_ip.SKU).first()
 
@@ -101,13 +102,13 @@ class ItemPedido(ModeloBase):
 
         except ValueError:
             limpar_tela()
-            print(
-                "Oops! Parece que você digitou um caractere que não é um número, por favor tente de novo.")
+            print("Oops! Parece que você digitou um caractere que não é um número, por favor tente de novo.")
 
         session.commit()
         print("\n Alteração feita com sucesso!")
 
     def deletar_item_pedido(self, del_id_item_pedido = None):
+        """Delete um item pedido de acordo com o 'ID'"""
         if del_id_item_pedido is None:
             del_id_item_pedido = int(input("Digite o id do item que será deletado: "))
 
@@ -117,5 +118,6 @@ class ItemPedido(ModeloBase):
         session.commit()
 
     def retorna_valor(self, id_item_pedido):
+        """Função para retornar um valor do item do pedido pelo ID"""
         item_pedido_val = session.query(ItemPedido).filter_by(id_itemPedido = id_item_pedido).first()
         return item_pedido_val.Valor_ItemPedido

@@ -10,7 +10,13 @@ class Cliente(ModeloBase):
 
     def adicionar_cliente(self):
         nome_cliente = input("Digite o nome do cliente a ser cadastrado: ")
-        telefone_cliente = input("Digite o telefone (somente número): ")
+
+        while True: #Valida se o telefone tem 8 dígitos e elimina o "-"
+            telefone_cliente = input("Digite o telefone (somente número): ").replace("-","")
+            if len(telefone_cliente) < 8:
+                print("Digite um telefone com no minimo 8 dígitos, digite novamente")
+            else:
+                break
 
         criar_cliente = session.query(Cliente).filter_by(Telefone=telefone_cliente).first()
         if not criar_cliente:
@@ -23,7 +29,7 @@ class Cliente(ModeloBase):
             return
         print("Telefone já cadastrado")
 
-    def _Exibir_detalhes_cliente(self, tel):
+    def _exibir_detalhes_cliente(self, tel):
         print(f"Nome: {tel.Nome}")
         print(f"Telefone {tel.Telefone}\n")
 
@@ -35,35 +41,32 @@ class Cliente(ModeloBase):
         if tel_cliente:
             cli = session.query(Cliente).filter_by(Telefone=tel_cliente).first()
             if cli:
-                self._Exibir_detalhes_cliente(cli)
+                self._exibir_detalhes_cliente(cli)
                 return
             else:
-                print()
-                print("Cliente não encontrado")
-                print()
+                print("\nCliente não encontrado\n")
                 return
         else:
             cli = session.query(Cliente).all()
             for cliente_dado in cli:  # percorre o conjunto de matérias
-                self._Exibir_detalhes_cliente(cliente_dado)
+                self._exibir_detalhes_cliente(cliente_dado)
 
-    def Alterar_cliente(self, tel_cliente=None):
-        if tel_cliente is None:
+    def alterar_cliente(self, tel_cliente=None):
+        if tel_cliente is None: #Valida se o tel_cliente entrou como parametro ou não
             tel_cliente = input("Digite o telefone do cliente que será alterado: ")
         while True:
             cliente = session.query(Cliente).filter_by(Telefone=tel_cliente).one_or_none()
             if not cliente:
                 print("Erro: Nenhum cliente encontrado com esse telefone!")
             else:
-                self._Exibir_detalhes_cliente(cliente)
+                self._exibir_detalhes_cliente(cliente)
             if cliente:
                 while True:
                     opcao = input("Você deseja alterar o nome? (S/N)").upper()
                     if opcao[0] == "S":
                         cliente.Nome = input("Digite o novo nome do cliente: ")
                     elif opcao[0] == "N":
-                        print(
-                            "O telefone é um atributo imutável, caso você deseje esse cliente com um novo número, será preciso criar um novo cadastro!")
+                        print("O telefone é um atributo imutável, caso você deseje esse cliente com um novo número, será preciso criar um novo cadastro!")
                         return
                     else:
                         print("Nenhum valor um válido foi digitado!")
@@ -79,7 +82,7 @@ class Cliente(ModeloBase):
                 if not tel_cliente:
                     break
 
-    def Deletar_cliente(self):
+    def deletar_cliente(self):
         from models.pedidos import Pedido
         del_telefone = input("Digite o telefone do cliente que será deletado: ")
 
